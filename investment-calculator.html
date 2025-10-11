@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Investment Return Calculator</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --accent-600: #16a34a;
+      --danger: #ef4444;
+      --border: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% 0%, #1f2937 0%, #0b1220 40%, #050a14 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    main {
+      width: 100%;
+      max-width: 920px;
+      display: grid;
+      gap: 16px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0.3px;
+    }
+    header p { margin: 4px 0 0; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .field { display: grid; gap: 6px; margin: 10px 0; }
+    .field label { font-size: 13px; color: var(--muted); }
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .field input:focus {
+      border-color: #334155;
+      box-shadow: 0 0 0 3px rgba(51,65,85,0.35);
+    }
+
+    .actions { display: flex; gap: 10px; margin-top: 14px; }
+    button {
+      appearance: none;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.05s ease, background 0.2s ease, opacity 0.2s ease;
+    }
+    button.primary { background: var(--accent); color: #052e16; }
+    button.primary:hover { background: var(--accent-600); }
+    button.secondary { background: #0b1220; color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { opacity: 0.85; }
+    button:active { transform: translateY(1px); }
+
+    .hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+
+    #result[hidden] { display: none; }
+    #result .result-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px dashed #223049;
+    }
+    #result .result-line:last-child { border-bottom: none; }
+    #result .label { color: var(--muted); }
+    #result .value { font-size: 18px; font-weight: 700; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(34,197,94,0.14);
+      border: 1px solid rgba(34,197,94,0.35);
+      color: #86efac;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .error { color: var(--danger); font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Investment Return Calculator</h1>
+      <p>Monthly compounding with yearly SIP step-up. Reset clears inputs and hides results.</p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <form id="calc-form">
+          <div class="field">
+            <label for="lumpsum">Lumpsum (INR)</label>
+            <input id="lumpsum" type="text" inputmode="decimal" placeholder="e.g., 6 lakh or 600000" />
+          </div>
+          <div class="field">
+            <label for="sip">SIP per month (INR)</label>
+            <input id="sip" type="text" inputmode="decimal" placeholder="e.g., 20000" />
+          </div>
+          <div class="field">
+            <label for="stepUp">Yearly increase per month (INR)</label>
+            <input id="stepUp" type="text" inputmode="decimal" placeholder="e.g., 2000" />
+          </div>
+          <div class="field">
+            <label for="tenure">Tenure (years)</label>
+            <input id="tenure" type="number" min="0" step="1" placeholder="e.g., 20" />
+          </div>
+          <div class="field">
+            <label for="rate">Return percentage (annual %)</label>
+            <input id="rate" type="number" min="-100" step="0.01" placeholder="e.g., 15" />
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">Calculate</button>
+            <button type="button" id="resetBtn" class="secondary">Reset</button>
+          </div>
+          <p class="hint">Tip: Inputs accept words like <b>lakh</b>/<b>crore</b>. Example: <i>6 lakh</i>.</p>
+          <div id="error" class="error" hidden></div>
+        </form>
+      </section>
+
+      <section id="result" class="card" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <h2 style="margin:0;">Result</h2>
+          <span class="badge" id="summaryBadge"></span>
+        </div>
+        <div class="result-line">
+          <span class="label">Total future value</span>
+          <span class="value" id="totalValue">—</span>
+        </div>
+        <div class="result-line">
+          <span class="label">Approx in crore</span>
+          <span class="value" id="totalCrore">—</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    function parseMoney(input) {
+      if (input == null) return 0;
+      if (typeof input !== 'string') return Number(input) || 0;
+      const trimmed = input.trim().toLowerCase();
+      if (trimmed === '') return 0;
+
+      // Normalize separators
+      const normalized = trimmed.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+
+      // Support lakh/crore/k/m/million/thousand
+      const unitMap = new Map([
+        ['k', 1e3], ['thousand', 1e3],
+        ['lac', 1e5], ['lakh', 1e5], ['lacs', 1e5], ['lakhs', 1e5],
+        ['cr', 1e7], ['crore', 1e7], ['crores', 1e7],
+        ['m', 1e6], ['million', 1e6]
+      ]);
+
+      const match = normalized.match(/^([-+]?\d*\.?\d+)(?:\s*([a-z]+))?$/i);
+      if (match) {
+        const value = parseFloat(match[1]);
+        const unitWord = match[2];
+        const multiplier = unitWord ? unitMap.get(unitWord) : 1;
+        if (!Number.isNaN(value) && (multiplier || multiplier === 1)) {
+          return value * (multiplier || 1);
+        }
+      }
+
+      // Fallback: strip non-numeric chars
+      const digitsOnly = normalized.replace(/[^0-9.-]/g, '');
+      const num = parseFloat(digitsOnly);
+      return Number.isNaN(num) ? 0 : num;
+    }
+
+    function formatINR(value) {
+      return value.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    }
+
+    function computeFutureValue(lumpsum, sipMonthly, annualStepUpPerMonth, tenureYears, annualRatePercent) {
+      const totalMonths = Math.max(0, Math.round(tenureYears * 12));
+      const monthlyRate = Math.pow(1 + (annualRatePercent || 0) / 100, 1/12) - 1;
+
+      let total = (lumpsum || 0) * Math.pow(1 + monthlyRate, totalMonths);
+
+      for (let monthIndex = 1; monthIndex <= totalMonths; monthIndex++) {
+        const yearIndex = Math.floor((monthIndex - 1) / 12); // 0-based year
+        const monthlyContribution = (sipMonthly || 0) + yearIndex * (annualStepUpPerMonth || 0);
+        total += monthlyContribution * Math.pow(1 + monthlyRate, totalMonths - monthIndex);
+      }
+      return total;
+    }
+
+    const form = document.getElementById('calc-form');
+    const errorEl = document.getElementById('error');
+    const resultSection = document.getElementById('result');
+    const totalValueEl = document.getElementById('totalValue');
+    const totalCroreEl = document.getElementById('totalCrore');
+    const summaryBadge = document.getElementById('summaryBadge');
+    const resetBtn = document.getElementById('resetBtn');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+
+      const lumpsum = parseMoney(document.getElementById('lumpsum').value || '0');
+      const sip = parseMoney(document.getElementById('sip').value || '0');
+      const stepUp = parseMoney(document.getElementById('stepUp').value || '0');
+      const tenure = parseFloat(document.getElementById('tenure').value || '0');
+      const rate = parseFloat(document.getElementById('rate').value || '0');
+
+      if (!Number.isFinite(tenure) || tenure <= 0) {
+        errorEl.textContent = 'Please enter a valid tenure in years (greater than 0).';
+        errorEl.hidden = false;
+        resultSection.hidden = true;
+        return;
+      }
+
+      if (!Number.isFinite(rate)) {
+        errorEl.textContent = 'Please enter a valid annual return percentage.';
+        errorEl.hidden = false;
+        resultSection.hidden = true;
+        return;
+      }
+
+      const fv = computeFutureValue(lumpsum, sip, stepUp, tenure, rate);
+
+      totalValueEl.textContent = '₹ ' + formatINR(fv);
+      const crore = fv / 1e7;
+      const croreRounded = Math.round(crore);
+      totalCroreEl.textContent = `${formatINR(crore)} crore (≈ ${croreRounded} crore)`;
+
+      summaryBadge.textContent = `${rate}% · ${tenure} yr${tenure > 1 ? 's' : ''}`;
+      resultSection.hidden = false;
+    });
+
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      resultSection.hidden = true;
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+      totalValueEl.textContent = '—';
+      totalCroreEl.textContent = '—';
+      summaryBadge.textContent = '';
+    });
+
+    // Uncomment below to auto-fill Example 1 for quick manual testing
+    // document.getElementById('lumpsum').value = '6 lakh';
+    // document.getElementById('sip').value = '20000';
+    // document.getElementById('stepUp').value = '2000';
+    // document.getElementById('tenure').value = '20';
+    // document.getElementById('rate').value = '15';
+  </script>
+</body>
+</html>
