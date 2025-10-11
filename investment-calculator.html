@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Investment Return Calculator (Lumpsum + SIP Step-Up)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --accent-2: #06b6d4;
+      --danger: #ef4444;
+      --ring: rgba(34,197,94,0.35);
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 10% 10%, #0b1027 0%, var(--bg) 60%),
+                  radial-gradient(1200px 800px at 90% 10%, #0b2830 0%, var(--bg) 60%),
+                  var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+    .title {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .title h1 {
+      margin: 0 0 6px 0;
+      font-size: 28px;
+      letter-spacing: 0.2px;
+    }
+    .title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter: blur(6px);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    label {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+    }
+    input[type="number"], input[type="text"] {
+      background: #0b1224;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 12px 12px;
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      cursor: pointer;
+      transition: transform .02s ease-in, filter .15s ease, box-shadow .25s ease;
+    }
+    button:active { transform: translateY(1px); }
+    .btn-primary {
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 6px 18px rgba(34,197,94,.35);
+    }
+    .btn-secondary {
+      background: linear-gradient(180deg, #0ea5e9, #0284c7);
+      color: white;
+      box-shadow: 0 6px 18px rgba(14,165,233,.35);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px dashed rgba(255,255,255,0.2);
+    }
+    .error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+    .result {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(34,197,94,0.35);
+      background: linear-gradient(180deg, rgba(34,197,94,0.12), rgba(34,197,94,0.06));
+      display: none;
+    }
+    .result h2 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      color: #a7f3d0;
+    }
+    .result p {
+      margin: 6px 0;
+      color: #d1fae5;
+      font-size: 15px;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">
+      <h1>Investment Return Calculator</h1>
+      <p>Lumpsum + SIP with yearly step-up. Monthly compounding.</p>
+    </div>
+
+    <div class="panel">
+      <form id="calc-form">
+        <div class="grid">
+          <div class="field">
+            <label for="lumpsum">Lumpsum amount (INR)</label>
+            <input id="lumpsum" name="lumpsum" type="number" min="0" step="1" placeholder="e.g. 600000" />
+            <div class="hint">One-time investment at start.</div>
+          </div>
+
+          <div class="field">
+            <label for="sip">SIP per month (INR)</label>
+            <input id="sip" name="sip" type="number" min="0" step="1" placeholder="e.g. 20000" />
+            <div class="hint">Recurring monthly contribution.</div>
+          </div>
+
+          <div class="field">
+            <label for="stepUp">Yearly increase in SIP (INR per month)</label>
+            <input id="stepUp" name="stepUp" type="number" min="0" step="1" placeholder="e.g. 2000" />
+            <div class="hint">Each year the monthly SIP increases by this amount.</div>
+          </div>
+
+          <div class="field">
+            <label for="years">Tenure (years)</label>
+            <input id="years" name="years" type="number" min="0" step="0.5" placeholder="e.g. 20" />
+          </div>
+
+          <div class="field">
+            <label for="rate">Return percentage (annual %)</label>
+            <input id="rate" name="rate" type="number" min="0" max="100" step="0.01" placeholder="e.g. 15" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">Calculate</button>
+          <button type="button" id="resetBtn" class="btn-secondary">Reset</button>
+          <button type="button" id="fillExample1" class="btn-ghost">Fill Example 1</button>
+          <button type="button" id="fillExample2" class="btn-ghost">Fill Example 2</button>
+        </div>
+        <div id="error" class="error">Please enter valid non-negative values for all fields.</div>
+      </form>
+
+      <div id="result" class="result" aria-live="polite">
+        <h2>Estimated future value</h2>
+        <p id="resultMoney"></p>
+        <p id="resultCrore"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('calc-form');
+    const errorBox = document.getElementById('error');
+    const resultBox = document.getElementById('result');
+    const resultMoney = document.getElementById('resultMoney');
+    const resultCrore = document.getElementById('resultCrore');
+
+    function parseNumber(input) {
+      const value = Number((input.value || '').toString().replace(/[,\s]/g, ''));
+      return Number.isFinite(value) ? value : NaN;
+    }
+
+    function formatINR(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    function toCrore(amount) {
+      return amount / 1e7; // 1 crore = 10,000,000
+    }
+
+    function computeFutureValue(lumpsum, sipPerMonth, sipStepUpPerYear, years, annualRatePct) {
+      const totalMonths = Math.max(0, Math.round(years * 12));
+      const monthlyRate = Math.pow(1 + (annualRatePct / 100), 1/12) - 1;
+
+      let futureValue = lumpsum * Math.pow(1 + monthlyRate, totalMonths);
+
+      for (let monthIndex = 1; monthIndex <= totalMonths; monthIndex++) {
+        const yearIndex = Math.floor((monthIndex - 1) / 12);
+        const contributionThisMonth = sipPerMonth + (yearIndex * sipStepUpPerYear);
+        futureValue += contributionThisMonth * Math.pow(1 + monthlyRate, totalMonths - monthIndex);
+      }
+
+      return futureValue;
+    }
+
+    function calculate(event) {
+      if (event) event.preventDefault();
+
+      const lumpsum = parseNumber(document.getElementById('lumpsum'));
+      const sip = parseNumber(document.getElementById('sip'));
+      const stepUp = parseNumber(document.getElementById('stepUp'));
+      const years = parseNumber(document.getElementById('years'));
+      const rate = parseNumber(document.getElementById('rate'));
+
+      const invalid = [lumpsum, sip, stepUp, years, rate].some(v => !Number.isFinite(v) || v < 0);
+      if (invalid) {
+        errorBox.style.display = 'block';
+        resultBox.style.display = 'none';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      const fv = computeFutureValue(lumpsum, sip, stepUp, years, rate);
+      resultMoney.textContent = `${formatINR(fv)}`;
+      resultCrore.textContent = `${toCrore(fv).toFixed(2)} crore`;
+      resultBox.style.display = 'block';
+    }
+
+    function resetAll() {
+      form.reset();
+      errorBox.style.display = 'none';
+      resultBox.style.display = 'none';
+      resultMoney.textContent = '';
+      resultCrore.textContent = '';
+    }
+
+    form.addEventListener('submit', calculate);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+    // Quick-fill buttons matching your examples
+    document.getElementById('fillExample1').addEventListener('click', () => {
+      document.getElementById('lumpsum').value = 600000; // 6 lac
+      document.getElementById('sip').value = 20000; // per month
+      document.getElementById('stepUp').value = 2000; // per month each year
+      document.getElementById('years').value = 20; // years
+      document.getElementById('rate').value = 15; // % annual
+      calculate();
+    });
+
+    document.getElementById('fillExample2').addEventListener('click', () => {
+      document.getElementById('lumpsum').value = 750000; // 7.5 lac
+      document.getElementById('sip').value = 20000; // per month
+      document.getElementById('stepUp').value = 2000; // per month each year
+      document.getElementById('years').value = 10; // years
+      document.getElementById('rate').value = 15; // % annual
+      calculate();
+    });
+  </script>
+</body>
+</html>
