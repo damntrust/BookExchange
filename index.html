@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIP Today… SWP Tomorrow Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>SIP Today… SWP Tomorrow</h1>
+    <p class="subtitle">Calculate your future corpus and monthly withdrawal</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <form id="sipSwpForm" novalidate>
+        <div class="grid">
+          <div class="form-field">
+            <label for="sipAmount">Monthly SIP Amount (₹)</label>
+            <input id="sipAmount" name="sipAmount" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g., 5000" required />
+          </div>
+
+          <div class="form-field">
+            <label for="sipYears">SIP Period (Years)</label>
+            <input id="sipYears" name="sipYears" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g., 20" required />
+          </div>
+
+          <div class="form-field">
+            <label for="withdrawYears">Withdrawal Period (Years)</label>
+            <input id="withdrawYears" name="withdrawYears" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g., 20" required />
+          </div>
+
+          <div class="form-field">
+            <label for="sipReturn">Assumed Return During SIP Period (%)</label>
+            <input id="sipReturn" name="sipReturn" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="e.g., 12" required />
+          </div>
+
+          <div class="form-field">
+            <label for="withdrawReturn">Assumed Return During Withdrawal Period (%)</label>
+            <input id="withdrawReturn" name="withdrawReturn" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="e.g., 7" required />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="calculateBtn" class="btn btn-primary">Calculate</button>
+          <button type="button" id="resetBtn" class="btn btn-secondary">Reset</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="results" class="card results hidden" aria-live="polite" aria-atomic="true">
+      <div id="corpusLine" class="result-line"></div>
+      <div id="payoutLine" class="result-line"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Results are illustrative and assume monthly compounding with effective monthly rates.</small>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>

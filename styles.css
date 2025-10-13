@@ -1,0 +1,118 @@
+* { box-sizing: border-box; }
+:root {
+  --blue-900: #0b3d91; /* dark blue accent */
+  --blue-800: #0f56c4;
+  --blue-050: #eaf1ff;
+  --text-900: #0f172a;
+  --text-600: #334155;
+  --border-200: #e2e8f0;
+  --white: #ffffff;
+  --error: #b91c1c;
+  --radius: 12px;
+  --shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--text-900);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+}
+.app-header {
+  background: linear-gradient(180deg, var(--white) 0%, #f8fbff 100%);
+  border-bottom: 1px solid var(--border-200);
+  padding: 28px 20px 20px 20px;
+  text-align: center;
+}
+.app-header h1 {
+  margin: 0 0 6px 0;
+  color: var(--blue-900);
+  font-size: 28px;
+}
+.subtitle {
+  margin: 0;
+  color: var(--text-600);
+}
+.container {
+  max-width: 920px;
+  margin: 24px auto 40px auto;
+  padding: 0 16px;
+}
+.card {
+  background: var(--white);
+  border: 1px solid var(--border-200);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+.form-field {
+  grid-column: span 12;
+}
+@media (min-width: 720px) {
+  .form-field { grid-column: span 6; }
+}
+.form-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-900);
+}
+.form-field input[type='number'] {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-200);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text-900);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-field input[type='number']:focus {
+  border-color: var(--blue-800);
+  box-shadow: 0 0 0 3px rgba(15, 86, 196, 0.15);
+}
+.form-field input[aria-invalid='true'] {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.btn {
+  appearance: none;
+  border: 1px solid transparent;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary {
+  background: var(--blue-900);
+  color: var(--white);
+}
+.btn-primary:hover { background: #093472; }
+.btn-secondary {
+  background: var(--blue-050);
+  border-color: var(--border-200);
+  color: var(--blue-900);
+}
+.btn-secondary:hover { background: #dbe7ff; }
+.results.hidden { display: none; }
+.results .result-line {
+  font-size: 18px;
+  margin: 8px 0;
+}
+.app-footer {
+  text-align: center;
+  color: var(--text-600);
+  padding: 20px 16px 40px 16px;
+}
